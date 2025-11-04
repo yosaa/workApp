@@ -17,6 +17,7 @@
     "url": ""
   },
   "permissions": {
+    "SQLite": {},
     "UniNView": {
       "description": "UniNView原生渲染"
     }
@@ -93,7 +94,7 @@
           "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>"
         ],
         "abiFilters": [
-          "armeabi-v7a"
+          "arm64-v8a"
         ]
       },
       "apple": {
