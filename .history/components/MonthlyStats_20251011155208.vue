@@ -2,13 +2,7 @@
   <view class="stats-container" v-if="showStats">
     <view class="stats-card">
       <view class="stats-header">
-        <view class="stats-title">
-          <picker mode="date" fields="month" :value="dateString" @change="onDateChange">
-            <view class="date-selector">
-              {{selectedYear}}年{{selectedMonth}}月统计 ▾
-            </view>
-          </picker>
-        </view>
+        <view class="stats-title">本月统计</view>
         <view class="close-btn" @click="closeStats">×</view>
       </view>
       
@@ -39,7 +33,7 @@
 		  </view>
 		  
 		  <view class="stat-item">
-			<view class="stat-label2">本月11号到20号收入总和</view>
+			<view class="stat-label2">本月11号到21号收入总和</view>
 			<view class="stat-value">¥{{total_11_20}}</view>
 		  </view>
 		  
@@ -71,8 +65,6 @@ export default {
   },
   data() {
     return {
-      selectedYear: this.year,
-      selectedMonth: this.month,
       workDays: 0,
       dailyAverage: 0,
       maxDaily: 0,
@@ -82,11 +74,6 @@ export default {
       total_21_max: 0,
       dbReady: false
     };
-  },
-  computed: {
-    dateString() {
-      return `${this.selectedYear}-${String(this.selectedMonth).padStart(2, '0')}`;
-    }
   },
   async mounted() {
     try {
@@ -98,28 +85,19 @@ export default {
     }
   },
   watch: {
-    year(newVal) {
-      this.selectedYear = newVal;
+    year() {
+      this.calculateStats();
     },
-    month(newVal) {
-      this.selectedMonth = newVal;
+    month() {
+      this.calculateStats();
     },
     showStats(newVal) {
       if (newVal) {
-        // 每次打开时重置为 props 传入的年月（即当前年月）
-        this.selectedYear = this.year;
-        this.selectedMonth = this.month;
         this.calculateStats();
       }
     }
   },
   methods: {
-    onDateChange(e) {
-      const [y, m] = e.detail.value.split('-');
-      this.selectedYear = parseInt(y);
-      this.selectedMonth = parseInt(m);
-      this.calculateStats();
-    },
     formatAmount(amount) {
       const num = parseFloat(amount);
       if (Number.isInteger(num)) {
@@ -128,17 +106,17 @@ export default {
       return num.toFixed(3).replace(/\.?0+$/, '');
     },
     async calculateStats() {
-      console.log('=== 计算统计数据 ===');
-      console.log('年份:', this.selectedYear, '月份:', this.selectedMonth);
+      console.log('=== 计算本月统计 ===');
+      console.log('年份:', this.year, '月份:', this.month);
 
       try {
         let monthRecords = [];
         
         if (this.dbReady === true) {
           console.log('使用数据库查询');
-          const startDate = `${this.selectedYear}-${String(this.selectedMonth).padStart(2, '0')}-01`;
-          const lastDay = new Date(this.selectedYear, this.selectedMonth, 0).getDate();
-          const endDate = `${this.selectedYear}-${String(this.selectedMonth).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+          const startDate = `${this.year}-${String(this.month).padStart(2, '0')}-01`;
+          const lastDay = new Date(this.year, this.month, 0).getDate();
+          const endDate = `${this.year}-${String(this.month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
           
           monthRecords = await dbManager.getWorkRecordsByDateRange(startDate, endDate);
         } else {
@@ -242,7 +220,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  z-index: 1000;
 }
 
 .stats-card {
@@ -266,18 +244,6 @@ export default {
   font-size: 36rpx;
   font-weight: bold;
   color: #2c3e50;
-  display: flex;
-  align-items: center;
-}
-
-.date-selector {
-  display: flex;
-  align-items: center;
-  color: #2d5a2d;
-  background: #f0f8ff;
-  padding: 8rpx 20rpx;
-  border-radius: 12rpx;
-  font-size: 32rpx;
 }
 
 .close-btn {
